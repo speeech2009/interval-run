@@ -231,9 +231,6 @@
   <button class="tab" onclick="showTab('shoes')">
     <span class="tab-icon">👟</span>シューズ
   </button>
-  <button class="tab" onclick="showTab('ai')">
-    <span class="tab-icon">🤖</span>AI
-  </button>
 </div>
 
 <!-- EDIT SCREEN -->
@@ -271,38 +268,6 @@
   </div>
 
   <button class="start-btn" onclick="startRun()">▶ START</button>
-</div>
-
-<!-- AI RECOMMEND SCREEN -->
-<div id="ai-screen" style="display:none">
-  <div class="ai-card">
-    <div style="font-size:13px;font-weight:700;margin-bottom:4px">🤖 AIメニューレコメンド</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">目標を選ぶとメニューを自動生成します</div>
-
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">🎯 目標</div>
-    <div id="ai-goals" style="display:flex;flex-wrap:wrap;margin-bottom:14px">
-      <button class="ai-goal-btn" onclick="selectGoal(this,'5kmを速く走りたい')">5km速く</button>
-      <button class="ai-goal-btn" onclick="selectGoal(this,'10kmを完走したい')">10km完走</button>
-      <button class="ai-goal-btn" onclick="selectGoal(this,'脂肪燃焼・ダイエット')">脂肪燃焼</button>
-      <button class="ai-goal-btn" onclick="selectGoal(this,'スタミナをつけたい')">スタミナ</button>
-      <button class="ai-goal-btn" onclick="selectGoal(this,'最大スピードを上げたい')">スピード強化</button>
-      <button class="ai-goal-btn" onclick="selectGoal(this,'初心者・走り始め')">初心者</button>
-    </div>
-
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">💪 現在のレベル</div>
-    <div id="ai-levels" style="display:flex;flex-wrap:wrap;margin-bottom:14px">
-      <button class="ai-goal-btn" onclick="selectLevel(this,'初心者（週1〜2回）')">初心者</button>
-      <button class="ai-goal-btn" onclick="selectLevel(this,'中級者（週3〜4回）')">中級者</button>
-      <button class="ai-goal-btn" onclick="selectLevel(this,'上級者（週5回以上）')">上級者</button>
-    </div>
-
-    <button onclick="getAIRecommend()"
-      style="width:100%;padding:14px;border-radius:12px;border:none;background:#333;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
-      ✨ メニューを生成
-    </button>
-  </div>
-
-  <div id="ai-result-area"></div>
 </div>
 
 <!-- SHOES SCREEN -->
@@ -434,12 +399,11 @@ function announceCountdown(n) {
 // ===== TABS =====
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['edit','history','shoes','ai'][i] === tab);
+    t.classList.toggle('active', ['edit','history','shoes'][i] === tab);
   });
   document.getElementById('edit-screen').style.display = tab === 'edit' ? 'block' : 'none';
   document.getElementById('history-screen').style.display = tab === 'history' ? 'block' : 'none';
   document.getElementById('shoes-screen').style.display = tab === 'shoes' ? 'block' : 'none';
-  document.getElementById('ai-screen').style.display = tab === 'ai' ? 'block' : 'none';
   if (tab === 'history') renderHistory();
   if (tab === 'shoes') renderShoes();
 }
@@ -929,98 +893,6 @@ function onTouchEnd() {
   }
   touchDragId = null; touchTargetId = null;
   renderSteps();
-}
-
-// ===== AI RECOMMEND =====
-let selectedGoal = '';
-let selectedLevel = '';
-let aiRecommendedSteps = null;
-
-function selectGoal(btn, goal) {
-  document.querySelectorAll('#ai-goals .ai-goal-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedGoal = goal;
-}
-function selectLevel(btn, level) {
-  document.querySelectorAll('#ai-levels .ai-goal-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedLevel = level;
-}
-
-async function getAIRecommend() {
-  if (!selectedGoal || !selectedLevel) {
-    alert('目標とレベルを選んでください');
-    return;
-  }
-  const area = document.getElementById('ai-result-area');
-  area.innerHTML = '<div class="ai-loading">🤖 メニューを考えています…</div>';
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `あなたはランニングコーチです。以下の条件でインターバルトレーニングメニューを1つ提案してください。
-
-目標: ${selectedGoal}
-レベル: ${selectedLevel}
-
-以下のJSON形式のみで返してください。説明文や前後のテキストは不要です：
-{
-  "title": "メニュー名",
-  "description": "このメニューの効果（1〜2文）",
-  "sets": 4,
-  "steps": [
-    { "type": "run", "duration": 30 },
-    { "type": "jog", "duration": 60 }
-  ]
-}
-
-typeは "run"（ダッシュ）, "jog"（ジョグ）, "rest"（休憩）のいずれか。
-durationは秒数。stepsは1セットの内容のみ（2〜5ステップ）。`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.map(c => c.text || '').join('') || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    const menu = JSON.parse(clean);
-    aiRecommendedSteps = menu;
-    renderAIResult(menu);
-  } catch(e) {
-    area.innerHTML = '<div class="ai-loading" style="color:var(--run)">エラーが発生しました。もう一度お試しください。</div>';
-  }
-}
-
-function renderAIResult(menu) {
-  const area = document.getElementById('ai-result-area');
-  const stepLabels = { run: '🏃 ダッシュ', jog: '🚶 ジョグ', rest: '⏸ 休憩' };
-  const stepColors = { run: 'var(--run)', jog: 'var(--jog)', rest: 'var(--rest)' };
-  area.innerHTML = `
-    <div class="ai-result">
-      <div style="font-weight:700;font-size:16px;margin-bottom:6px">${menu.title}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${menu.description}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${menu.sets}セット × 以下のステップ</div>
-      ${menu.steps.map(s => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a2a2a">
-          <span style="color:${stepColors[s.type]};font-weight:700;font-size:13px">${stepLabels[s.type]}</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700">${fmt(s.duration)}</span>
-        </div>`).join('')}
-      <button class="ai-apply-btn" onclick="applyAIMenu()">▶ このメニューを使う</button>
-    </div>`;
-}
-
-function applyAIMenu() {
-  if (!aiRecommendedSteps) return;
-  sets = aiRecommendedSteps.sets || 4;
-  steps = aiRecommendedSteps.steps.map((s, i) => ({ id: nextId++, type: s.type, duration: s.duration }));
-  document.getElementById('sets-val').textContent = sets;
-  renderSteps();
-  showTab('edit');
 }
 
 // ===== INIT =====
