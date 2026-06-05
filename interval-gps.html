@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>インターバルラン</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --run: #FF2D2D;
+    --jog: #FF8C00;
+    --rest: #00C87A;
+    --bg: #0D0D0D;
+    --card: #181818;
+    --card2: #222;
+    --text: #F5F5F5;
+    --muted: #666;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    padding: 20px 16px 90px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .subtitle { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+
+  /* BOTTOM NAV */
+  .tabs {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; background: #111;
+    border-top: 1px solid #2a2a2a;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 100; max-width: 480px; margin: 0 auto;
+  }
+  .tab {
+    flex: 1; padding: 8px 4px; border-radius: 0; border: none;
+    background: none; color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 10px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tab .tab-icon { font-size: 22px; line-height: 1; }
+  .tab.active { color: var(--text); }
+  .tab.active .tab-icon { transform: scale(1.15); }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  /* SETS ROW */
+  .row { display: flex; align-items: center; justify-content: space-between; }
+  .label { font-size: 13px; color: var(--muted); }
+  .counter { display: flex; align-items: center; gap: 16px; }
+  .cnt-val { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; min-width: 32px; text-align: center; }
+  .cnt-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--card2); border: none; color: var(--text);
+    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* STEP CARD */
+  .step-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--muted);
+    transition: border-color 0.2s;
+  }
+  .step-card.run { border-color: var(--run); }
+  .step-card.jog { border-color: var(--jog); }
+  .step-card.rest { border-color: var(--rest); }
+
+  .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .step-num { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .del-btn { background: none; border: none; color: #FF2D2D; font-size: 18px; cursor: pointer; }
+
+  .type-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+  .type-btn {
+    flex: 1; padding: 9px 4px; border-radius: 10px; border: none;
+    background: var(--card2); color: var(--muted);
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .type-btn.active-run { background: var(--run); color: #fff; }
+  .type-btn.active-jog { background: var(--jog); color: #fff; }
+  .type-btn.active-rest { background: var(--rest); color: #fff; }
+
+  .dur-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .dur-val { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; min-width: 72px; text-align: center; }
+  .adj-btns { display: flex; gap: 6px; }
+  .adj-btn {
+    padding: 5px 9px; border-radius: 8px; border: none;
+    background: var(--card2); color: var(--muted);
+    font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+
+  /* ADD STEP */
+  .add-btn {
+    width: 100%; padding: 14px; border-radius: 14px;
+    border: 2px dashed #333; background: none;
+    color: var(--muted); font-size: 14px; cursor: pointer; margin-bottom: 16px;
+  }
+
+  /* SUMMARY */
+  .summary {
+    background: var(--card); border-radius: 18px; padding: 16px;
+    display: flex; justify-content: space-around; margin-bottom: 20px;
+  }
+  .sum-item { text-align: center; }
+  .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
+  .sum-val { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; }
+
+  /* START BTN */
+  .start-btn {
+    width: 100%; padding: 20px; border-radius: 20px;
+    border: none; background: var(--run);
+    color: #fff; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 900; letter-spacing: 3px;
+    cursor: pointer;
+  }
+
+  /* === TIMER SCREEN === */
+  #timer-screen { display: none; }
+
+  .phase-block {
+    border-radius: 24px;
+    padding: 36px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+    transition: background 0.5s ease;
+  }
+  .phase-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 4px;
+    opacity: 0.8; margin-bottom: 6px;
+  }
+  .phase-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 88px; font-weight: 900; line-height: 1;
+    letter-spacing: -4px;
+  }
+  .phase-set { font-size: 12px; opacity: 0.7; margin-top: 8px; }
+  .progress-bar {
+    position: absolute; bottom: 0; left: 0; height: 5px;
+    background: rgba(255,255,255,0.45);
+    transition: width 1s linear;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat-card { background: var(--card); border-radius: 14px; padding: 14px; text-align: center; }
+  .stat-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
+  .stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; }
+
+  .next-card { background: var(--card); border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .next-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  .next-val { font-size: 14px; font-weight: 700; }
+
+  .gps-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 20px;
+    background: var(--card); font-size: 11px; color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .gps-dot.active { background: var(--rest); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .stop-btn {
+    width: 100%; padding: 16px; border-radius: 16px; border: none;
+    background: var(--card2); color: var(--run);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  }
+
+  /* === HISTORY === */
+  .run-entry { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+  .run-date { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .run-stats { display: flex; gap: 20px; }
+  .rs { }
+  .rs-val { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; }
+  .rs-label { font-size: 10px; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+  /* DRAG & DROP */
+  .step-card { cursor: grab; user-select: none; }
+  .step-card.dragging { opacity: 0.4; cursor: grabbing; }
+  .step-card.drag-over { outline: 2px dashed #fff; }
+  .drag-handle { font-size: 18px; color: var(--muted); margin-right: 8px; cursor: grab; touch-action: none; }
+
+  .done-banner {
+    background: var(--rest); border-radius: 16px; padding: 18px;
+    text-align: center; margin-bottom: 14px;
+  }
+  .done-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+
+<h1>⚡ Interval Run</h1>
+<p class="subtitle">カスタムインターバルトレーニング + GPS記録</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('edit')">
+    <span class="tab-icon">🏃</span>メニュー
+  </button>
+  <button class="tab" onclick="showTab('history')">
+    <span class="tab-icon">📋</span>走歴
+  </button>
+  <button class="tab" onclick="showTab('shoes')">
+    <span class="tab-icon">👟</span>シューズ
+  </button>
+  <button class="tab" onclick="showTab('ai')">
+    <span class="tab-icon">🤖</span>AI
+  </button>
+</div>
+
+<!-- EDIT SCREEN -->
+<div id="edit-screen">
+  <div class="card row">
+    <span class="label">セット数</span>
+    <div class="counter">
+      <button class="cnt-btn" onclick="adjSets(-1)">−</button>
+      <span class="cnt-val" id="sets-val">4</span>
+      <button class="cnt-btn" onclick="adjSets(1)">＋</button>
+    </div>
+  </div>
+
+  <div id="steps-container"></div>
+
+  <button class="add-btn" onclick="addStep()">＋ ステップを追加</button>
+
+  <div class="summary">
+    <div class="sum-item">
+      <div class="sum-label">合計時間</div>
+      <div class="sum-val" id="total-time-est">—</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-label">ステップ</div>
+      <div class="sum-val" id="total-steps-est">—</div>
+    </div>
+  </div>
+
+  <div class="card row" style="margin-bottom:12px">
+    <span class="label">👟 シューズ</span>
+    <select id="shoe-select"
+      style="background:var(--card2);color:var(--text);border:none;border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer">
+      <option value="">選択しない</option>
+    </select>
+  </div>
+
+  <button class="start-btn" onclick="startRun()">▶ START</button>
+</div>
+
+<!-- AI RECOMMEND SCREEN -->
+<div id="ai-screen" style="display:none">
+  <div class="ai-card">
+    <div style="font-size:13px;font-weight:700;margin-bottom:4px">🤖 AIメニューレコメンド</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">目標を選ぶとメニューを自動生成します</div>
+
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">🎯 目標</div>
+    <div id="ai-goals" style="display:flex;flex-wrap:wrap;margin-bottom:14px">
+      <button class="ai-goal-btn" onclick="selectGoal(this,'5kmを速く走りたい')">5km速く</button>
+      <button class="ai-goal-btn" onclick="selectGoal(this,'10kmを完走したい')">10km完走</button>
+      <button class="ai-goal-btn" onclick="selectGoal(this,'脂肪燃焼・ダイエット')">脂肪燃焼</button>
+      <button class="ai-goal-btn" onclick="selectGoal(this,'スタミナをつけたい')">スタミナ</button>
+      <button class="ai-goal-btn" onclick="selectGoal(this,'最大スピードを上げたい')">スピード強化</button>
+      <button class="ai-goal-btn" onclick="selectGoal(this,'初心者・走り始め')">初心者</button>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">💪 現在のレベル</div>
+    <div id="ai-levels" style="display:flex;flex-wrap:wrap;margin-bottom:14px">
+      <button class="ai-goal-btn" onclick="selectLevel(this,'初心者（週1〜2回）')">初心者</button>
+      <button class="ai-goal-btn" onclick="selectLevel(this,'中級者（週3〜4回）')">中級者</button>
+      <button class="ai-goal-btn" onclick="selectLevel(this,'上級者（週5回以上）')">上級者</button>
+    </div>
+
+    <button onclick="getAIRecommend()"
+      style="width:100%;padding:14px;border-radius:12px;border:none;background:#333;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
+      ✨ メニューを生成
+    </button>
+  </div>
+
+  <div id="ai-result-area"></div>
+</div>
+
+<!-- SHOES SCREEN -->
+<div id="shoes-screen" style="display:none">
+  <div id="shoes-list"></div>
+  <div class="card" style="margin-top:8px">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px">新しいシューズを追加</div>
+    <input id="shoe-name-input" type="text" placeholder="例: Nike Pegasus 41"
+      style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--card2);color:var(--text);font-size:14px;margin-bottom:10px">
+    <input id="shoe-limit-input" type="number" placeholder="交換目安 km（例: 800）"
+      style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--card2);color:var(--text);font-size:14px;margin-bottom:10px">
+    <button onclick="addShoe()"
+      style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--run);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;cursor:pointer">
+      ＋ 追加
+    </button>
+  </div>
+</div>
+
+<!-- シューズ選択（スタート前） -->
+
+<div id="timer-screen">
+  <div class="gps-badge">
+    <div class="gps-dot" id="gps-dot"></div>
+    <span id="gps-status">GPS取得中…</span>
+  </div>
+
+  <div id="done-banner" class="done-banner" style="display:none">
+    <div class="done-title">🎉 COMPLETE!</div>
+    <div style="font-size:13px;margin-top:4px">お疲れさまでした</div>
+  </div>
+
+  <div class="phase-block" id="phase-block">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    <div class="phase-label" id="phase-label">READY</div>
+    <div class="phase-time" id="phase-time">00:00</div>
+    <div class="phase-set" id="phase-set"></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">距離</div>
+      <div class="stat-val" id="stat-dist">0.00<span style="font-size:12px">km</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">経過</div>
+      <div class="stat-val" id="stat-elapsed">00:00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">ペース</div>
+      <div class="stat-val" id="stat-pace">—</div>
+    </div>
+  </div>
+
+  <div class="next-card" id="next-card">
+    <div>
+      <div class="next-label">NEXT</div>
+      <div class="next-val" id="next-val">—</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:10px">
+    <button class="stop-btn" onclick="stopRun()" style="flex:2">■ 終了して保存</button>
+    <button id="voice-btn" onclick="toggleVoice()"
+      style="flex:1;padding:16px;border-radius:16px;border:none;background:#222;color:#fff;font-size:20px;cursor:pointer">
+      🔊
+    </button>
+  </div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div id="history-screen" style="display:none">
+  <div id="history-list"></div>
+</div>
+
+<script>
+// ===== STATE =====
+let sets = 4;
+let steps = [
+  { id: 1, type: 'run', duration: 30 },
+  { id: 2, type: 'jog', duration: 60 },
+];
+let nextId = 3;
+
+// timer state
+let queue = [];
+let stepIdx = 0;
+let timeLeft = 0;
+let timerInterval = null;
+let elapsedSec = 0;
+let totalDistM = 0;
+let gpsActive = false;
+let watchId = null;
+let lastPos = null;
+let isDone = false;
+let voiceEnabled = true;
+
+const COLORS = { run: '#FF2D2D', jog: '#FF8C00', rest: '#00C87A', idle: '#1C1C1E' };
+const LABELS = { run: '🏃 DASH', jog: '🚶 JOG', rest: '⏸ REST' };
+const SPEEDS = { run: 4.0, jog: 2.5, rest: 0 }; // m/s fallback
+
+// ===== VOICE =====
+function speak(text) {
+  if (!voiceEnabled) return;
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 1.05;
+  u.pitch = 1.0;
+  window.speechSynthesis.speak(u);
+}
+
+const VOICE_LABELS = { run: 'ダッシュ！', jog: 'ジョグ！', rest: '休憩！' };
+
+function announceStep(step, isLast) {
+  if (!step) return;
+  const label = VOICE_LABELS[step.type] || '';
+  const sec = step.duration >= 60
+    ? `${Math.floor(step.duration/60)}分`
+    : `${step.duration}秒`;
+  const suffix = isLast ? '、ラストセットです！' : '';
+  speak(`${label} ${sec}${suffix}`);
+}
+
+function announceCountdown(n) {
+  speak(String(n));
+}
+
+// ===== TABS =====
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['edit','history','shoes','ai'][i] === tab);
+  });
+  document.getElementById('edit-screen').style.display = tab === 'edit' ? 'block' : 'none';
+  document.getElementById('history-screen').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('shoes-screen').style.display = tab === 'shoes' ? 'block' : 'none';
+  document.getElementById('ai-screen').style.display = tab === 'ai' ? 'block' : 'none';
+  if (tab === 'history') renderHistory();
+  if (tab === 'shoes') renderShoes();
+}
+
+// ===== EDIT =====
+function adjSets(d) {
+  sets = Math.max(1, sets + d);
+  document.getElementById('sets-val').textContent = sets;
+  updateSummary();
+}
+
+function addStep() {
+  steps.push({ id: nextId++, type: 'run', duration: 60 });
+  renderSteps();
+}
+
+function removeStep(id) {
+  steps = steps.filter(s => s.id !== id);
+  renderSteps();
+}
+
+function setType(id, type) {
+  steps = steps.map(s => s.id === id ? { ...s, type } : s);
+  renderSteps();
+}
+
+function adjDur(id, d) {
+  steps = steps.map(s => s.id === id ? { ...s, duration: Math.max(10, s.duration + d) } : s);
+  renderSteps();
+}
+
+function fmt(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function fmtDist(m) {
+  if (m < 1000) return Math.round(m) + 'm';
+  return (m / 1000).toFixed(2) + 'km';
+}
+
+function fmtPace(distM, elapsedSec) {
+  if (distM < 10) return '—';
+  const secPerKm = elapsedSec / (distM / 1000);
+  const m = Math.floor(secPerKm / 60), s = Math.round(secPerKm % 60);
+  return `${m}'${String(s).padStart(2,'0')}`;
+}
+
+function renderSteps() {
+  const c = document.getElementById('steps-container');
+  c.innerHTML = steps.map((s, i) => `
+    <div class="step-card ${s.type}" data-id="${s.id}"
+      draggable="true"
+      ondragstart="onDragStart(event,${s.id})"
+      ondragend="onDragEnd(event)"
+      ondragover="onDragOver(event,${s.id})"
+      ondrop="onDrop(event,${s.id})"
+      ontouchstart="onTouchStart(event,${s.id})"
+      ontouchmove="onTouchMove(event)"
+      ontouchend="onTouchEnd()">
+      <div class="step-header">
+        <span><span class="drag-handle">⠿</span><span class="step-num">STEP ${i + 1}</span></span>
+        <button class="del-btn" onclick="removeStep(${s.id})">✕</button>
+      </div>
+      <div class="type-btns">
+        ${['run','jog','rest'].map(t => `
+          <button class="type-btn ${s.type === t ? 'active-' + t : ''}"
+            onclick="setType(${s.id},'${t}')">
+            ${ t === 'run' ? '🏃 ダッシュ' : t === 'jog' ? '🚶 ジョグ' : '⏸ 休憩'}
+          </button>`).join('')}
+      </div>
+      <div class="dur-row">
+        <span class="label">時間</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDur(${s.id},-30)">-30s</button>
+            <button class="adj-btn" onclick="adjDur(${s.id},-10)">-10s</button>
+          </div>
+          <span class="dur-val">${fmt(s.duration)}</span>
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDur(${s.id},10)">+10s</button>
+            <button class="adj-btn" onclick="adjDur(${s.id},30)">+30s</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  updateSummary();
+}
+
+function updateSummary() {
+  const total = steps.reduce((a, s) => a + s.duration, 0) * sets;
+  document.getElementById('total-time-est').textContent = fmt(total);
+  document.getElementById('total-steps-est').textContent = `${steps.length} × ${sets}`;
+}
+
+// ===== TIMER =====
+function buildQueue() {
+  const q = [];
+  for (let s = 0; s < sets; s++) {
+    steps.forEach(step => q.push({ ...step, setNum: s + 1 }));
+  }
+  return q;
+}
+
+function startRun() {
+  if (steps.length === 0) return;
+  queue = buildQueue();
+  stepIdx = 0;
+  elapsedSec = 0;
+  totalDistM = 0;
+  lastPos = null;
+  isDone = false;
+
+  document.getElementById('edit-screen').style.display = 'none';
+  document.getElementById('timer-screen').style.display = 'block';
+  document.getElementById('done-banner').style.display = 'none';
+  document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+
+  startGPS();
+  speak('トレーニングを開始します！');
+  loadStep();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function loadStep() {
+  const cur = queue[stepIdx];
+  if (!cur) return;
+  timeLeft = cur.duration;
+  const isLast = cur.setNum === sets && stepIdx === queue.length - 1;
+  announceStep(cur, isLast);
+  updatePhaseUI();
+  updateNextUI();
+}
+
+function tick() {
+  elapsedSec++;
+  timeLeft--;
+
+  // fallback distance if no GPS
+  if (!gpsActive) {
+    const cur = queue[stepIdx];
+    if (cur) totalDistM += SPEEDS[cur.type];
+  }
+
+  updatePhaseUI();
+  updateStats();
+
+  // countdown beep at 3,2,1
+  if (timeLeft <= 3 && timeLeft > 0) announceCountdown(timeLeft);
+
+  if (timeLeft <= 0) {
+    stepIdx++;
+    if (stepIdx >= queue.length) {
+      finishRun();
+    } else {
+      loadStep();
+    }
+  }
+}
+
+function updatePhaseUI() {
+  const cur = queue[stepIdx];
+  if (!cur) return;
+  const block = document.getElementById('phase-block');
+  block.style.background = COLORS[cur.type];
+  document.getElementById('phase-label').textContent = LABELS[cur.type];
+  document.getElementById('phase-time').textContent = fmt(timeLeft);
+  document.getElementById('phase-set').textContent = `セット ${cur.setNum} / ${sets}`;
+  const pct = ((cur.duration - timeLeft) / cur.duration * 100).toFixed(1);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function updateNextUI() {
+  const next = queue[stepIdx + 1];
+  if (next) {
+    document.getElementById('next-val').textContent =
+      `${LABELS[next.type]}  ${fmt(next.duration)}`;
+  } else {
+    document.getElementById('next-val').textContent = 'ラスト！';
+  }
+}
+
+function updateStats() {
+  document.getElementById('stat-dist').innerHTML =
+    (totalDistM / 1000).toFixed(2) + '<span style="font-size:12px">km</span>';
+  document.getElementById('stat-elapsed').textContent = fmt(elapsedSec);
+  document.getElementById('stat-pace').textContent = fmtPace(totalDistM, elapsedSec);
+}
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  document.getElementById('voice-btn').textContent = voiceEnabled ? '🔊' : '🔇';
+}
+
+function finishRun() {
+  clearInterval(timerInterval);
+  stopGPS();
+  isDone = true;
+  speak('お疲れさまでした！トレーニング完了です！');
+  document.getElementById('done-banner').style.display = 'block';
+  document.getElementById('phase-block').style.background = '#00C87A';
+  document.getElementById('phase-label').textContent = 'COMPLETE';
+  document.getElementById('phase-time').textContent = '🎉';
+  saveRun();
+}
+
+function stopRun() {
+  clearInterval(timerInterval);
+  stopGPS();
+  if (!isDone) saveRun();
+  document.getElementById('timer-screen').style.display = 'none';
+  document.getElementById('edit-screen').style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.style.display = '');
+}
+
+// ===== GPS =====
+function startGPS() {
+  if (!navigator.geolocation) {
+    document.getElementById('gps-status').textContent = 'GPS非対応';
+    return;
+  }
+  watchId = navigator.geolocation.watchPosition(
+    pos => {
+      if (!gpsActive) {
+        gpsActive = true;
+        document.getElementById('gps-dot').classList.add('active');
+        document.getElementById('gps-status').textContent = 'GPS取得中';
+      }
+      if (lastPos) {
+        const d = calcDist(lastPos, pos.coords);
+        // filter noise: ignore jumps > 50m/s
+        if (d < 50) totalDistM += d;
+      }
+      lastPos = pos.coords;
+      updateStats();
+    },
+    err => {
+      document.getElementById('gps-status').textContent = 'GPS取得失敗（推定値使用）';
+    },
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+  );
+}
+
+function stopGPS() {
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  gpsActive = false;
+}
+
+function calcDist(c1, c2) {
+  const R = 6371000;
+  const dLat = (c2.latitude - c1.latitude) * Math.PI / 180;
+  const dLon = (c2.longitude - c1.longitude) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+    Math.cos(c1.latitude * Math.PI/180) * Math.cos(c2.latitude * Math.PI/180) *
+    Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// ===== WEATHER =====
+async function fetchWeather(lat, lon) {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m&timezone=auto`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const c = data.current;
+    return {
+      temp: Math.round(c.temperature_2m),
+      wind: Math.round(c.windspeed_10m),
+      code: c.weathercode,
+      icon: weatherIcon(c.weathercode),
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+function weatherIcon(code) {
+  if (code === 0) return '☀️';
+  if (code <= 2) return '🌤';
+  if (code <= 3) return '☁️';
+  if (code <= 49) return '🌫';
+  if (code <= 59) return '🌦';
+  if (code <= 69) return '🌧';
+  if (code <= 79) return '🌨';
+  if (code <= 82) return '🌧';
+  if (code <= 99) return '⛈';
+  return '🌡';
+}
+
+// ===== HISTORY =====
+async function saveRun() {
+  let weather = null;
+  // 位置情報があれば天気取得
+  const pos = lastPos;
+  if (pos) {
+    weather = await fetchWeather(pos.latitude, pos.longitude);
+  }
+
+  const shoeId = document.getElementById('shoe-select')?.value || null;
+  if (shoeId) addDistToShoe(shoeId, totalDistM);
+
+  const record = {
+    date: new Date().toISOString(),
+    distM: totalDistM,
+    elapsedSec,
+    steps: steps.map(s => ({ type: s.type, duration: s.duration })),
+    sets,
+    gps: gpsActive,
+    weather,
+    shoeId,
+    shoeName: shoeId ? (getShoes().find(s => s.id == shoeId)?.name || '') : '',
+  };
+  const history = JSON.parse(localStorage.getItem('interval-run-history') || '[]');
+  history.unshift(record);
+  localStorage.setItem('interval-run-history', JSON.stringify(history.slice(0, 100)));
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('interval-run-history') || '[]');
+  const el = document.getElementById('history-list');
+  if (history.length === 0) {
+    el.innerHTML = '<div class="empty">まだ記録がありません<br>走ってみよう！🏃</div>';
+    return;
+  }
+  el.innerHTML = history.map(r => {
+    const d = new Date(r.date);
+    const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `
+      <div class="run-entry">
+        <div class="run-date">${dateStr} ${r.gps ? '📍GPS' : '📐推定'}${r.weather ? `　${r.weather.icon} ${r.weather.temp}℃ 風${r.weather.wind}km/h` : ''}${r.shoeName ? `　👟 ${r.shoeName}` : ''}</div>
+        <div class="run-stats">
+          <div class="rs">
+            <div class="rs-val">${(r.distM/1000).toFixed(2)}<span style="font-size:12px">km</span></div>
+            <div class="rs-label">距離</div>
+          </div>
+          <div class="rs">
+            <div class="rs-val">${fmt(r.elapsedSec)}</div>
+            <div class="rs-label">時間</div>
+          </div>
+          <div class="rs">
+            <div class="rs-val">${fmtPace(r.distM, r.elapsedSec)}</div>
+            <div class="rs-label">ペース/km</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ===== SHOES =====
+function getShoes() {
+  return JSON.parse(localStorage.getItem('interval-shoes') || '[]');
+}
+function saveShoes(shoes) {
+  localStorage.setItem('interval-shoes', JSON.stringify(shoes));
+}
+
+function addShoe() {
+  const name = document.getElementById('shoe-name-input').value.trim();
+  const limit = parseFloat(document.getElementById('shoe-limit-input').value) || 800;
+  if (!name) return;
+  const shoes = getShoes();
+  shoes.push({ id: Date.now(), name, limitKm: limit, distM: 0 });
+  saveShoes(shoes);
+  document.getElementById('shoe-name-input').value = '';
+  document.getElementById('shoe-limit-input').value = '';
+  renderShoes();
+  updateShoeSelect();
+}
+
+function deleteShoe(id) {
+  saveShoes(getShoes().filter(s => s.id !== id));
+  renderShoes();
+  updateShoeSelect();
+}
+
+function renderShoes() {
+  const shoes = getShoes();
+  const el = document.getElementById('shoes-list');
+  if (shoes.length === 0) {
+    el.innerHTML = '<div class="empty">シューズが登録されていません</div>';
+    return;
+  }
+  el.innerHTML = shoes.map(s => {
+    const km = (s.distM / 1000).toFixed(1);
+    const pct = Math.min(100, (s.distM / 1000) / s.limitKm * 100);
+    const color = pct > 90 ? 'var(--run)' : pct > 70 ? 'var(--jog)' : 'var(--rest)';
+    return `
+      <div class="run-entry">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700;font-size:15px">👟 ${s.name}</div>
+          <button onclick="deleteShoe(${s.id})"
+            style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px">
+          <span>${km} km 走行</span>
+          <span>目安 ${s.limitKm} km</span>
+        </div>
+        <div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 0.4s"></div>
+        </div>
+        ${pct > 90 ? '<div style="font-size:11px;color:var(--run);margin-top:6px">⚠️ そろそろ交換時期です</div>' : ''}
+      </div>`;
+  }).join('');
+}
+
+function updateShoeSelect() {
+  const shoes = getShoes();
+  const sel = document.getElementById('shoe-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">選択しない</option>' +
+    shoes.map(s => `<option value="${s.id}" ${cur == s.id ? 'selected' : ''}>${s.name} (${(s.distM/1000).toFixed(0)}km)</option>`).join('');
+}
+
+function addDistToShoe(shoeId, distM) {
+  if (!shoeId) return;
+  const shoes = getShoes();
+  const s = shoes.find(s => s.id == shoeId);
+  if (s) { s.distM += distM; saveShoes(shoes); }
+}
+
+// ===== DRAG & DROP =====
+let dragSrcId = null;
+
+function onDragStart(e, id) {
+  dragSrcId = id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer && (e.dataTransfer.effectAllowed = 'move');
+}
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('drag-over'));
+}
+function onDragOver(e, id) {
+  e.preventDefault();
+  if (dragSrcId === id) return;
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+function onDrop(e, id) {
+  e.preventDefault();
+  if (dragSrcId === id) return;
+  const from = steps.findIndex(s => s.id === dragSrcId);
+  const to   = steps.findIndex(s => s.id === id);
+  if (from < 0 || to < 0) return;
+  const moved = steps.splice(from, 1)[0];
+  steps.splice(to, 0, moved);
+  renderSteps();
+}
+
+// Touch drag support
+let touchDragId = null, touchClone = null, touchTargetId = null;
+function onTouchStart(e, id) {
+  touchDragId = id;
+  const card = e.currentTarget;
+  const rect = card.getBoundingClientRect();
+  touchClone = card.cloneNode(true);
+  touchClone.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;opacity:0.8;pointer-events:none;z-index:9999;transition:none;`;
+  document.body.appendChild(touchClone);
+  card.style.opacity = '0.3';
+}
+function onTouchMove(e) {
+  if (!touchClone) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  touchClone.style.top = (t.clientY - 30) + 'px';
+  touchClone.style.left = touchClone.style.left;
+  // find card under finger
+  touchClone.style.display = 'none';
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  touchClone.style.display = '';
+  const card = el?.closest('.step-card');
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('drag-over'));
+  if (card) {
+    const id = parseInt(card.dataset.id);
+    touchTargetId = id;
+    if (id !== touchDragId) card.classList.add('drag-over');
+  }
+}
+function onTouchEnd() {
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  document.querySelectorAll('.step-card').forEach(c => { c.style.opacity = ''; c.classList.remove('drag-over'); });
+  if (touchDragId && touchTargetId && touchDragId !== touchTargetId) {
+    const from = steps.findIndex(s => s.id === touchDragId);
+    const to   = steps.findIndex(s => s.id === touchTargetId);
+    if (from >= 0 && to >= 0) { const m = steps.splice(from,1)[0]; steps.splice(to,0,m); }
+  }
+  touchDragId = null; touchTargetId = null;
+  renderSteps();
+}
+
+// ===== AI RECOMMEND =====
+let selectedGoal = '';
+let selectedLevel = '';
+let aiRecommendedSteps = null;
+
+function selectGoal(btn, goal) {
+  document.querySelectorAll('#ai-goals .ai-goal-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedGoal = goal;
+}
+function selectLevel(btn, level) {
+  document.querySelectorAll('#ai-levels .ai-goal-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedLevel = level;
+}
+
+async function getAIRecommend() {
+  if (!selectedGoal || !selectedLevel) {
+    alert('目標とレベルを選んでください');
+    return;
+  }
+  const area = document.getElementById('ai-result-area');
+  area.innerHTML = '<div class="ai-loading">🤖 メニューを考えています…</div>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `あなたはランニングコーチです。以下の条件でインターバルトレーニングメニューを1つ提案してください。
+
+目標: ${selectedGoal}
+レベル: ${selectedLevel}
+
+以下のJSON形式のみで返してください。説明文や前後のテキストは不要です：
+{
+  "title": "メニュー名",
+  "description": "このメニューの効果（1〜2文）",
+  "sets": 4,
+  "steps": [
+    { "type": "run", "duration": 30 },
+    { "type": "jog", "duration": 60 }
+  ]
+}
+
+typeは "run"（ダッシュ）, "jog"（ジョグ）, "rest"（休憩）のいずれか。
+durationは秒数。stepsは1セットの内容のみ（2〜5ステップ）。`
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const menu = JSON.parse(clean);
+    aiRecommendedSteps = menu;
+    renderAIResult(menu);
+  } catch(e) {
+    area.innerHTML = '<div class="ai-loading" style="color:var(--run)">エラーが発生しました。もう一度お試しください。</div>';
+  }
+}
+
+function renderAIResult(menu) {
+  const area = document.getElementById('ai-result-area');
+  const stepLabels = { run: '🏃 ダッシュ', jog: '🚶 ジョグ', rest: '⏸ 休憩' };
+  const stepColors = { run: 'var(--run)', jog: 'var(--jog)', rest: 'var(--rest)' };
+  area.innerHTML = `
+    <div class="ai-result">
+      <div style="font-weight:700;font-size:16px;margin-bottom:6px">${menu.title}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${menu.description}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${menu.sets}セット × 以下のステップ</div>
+      ${menu.steps.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a2a2a">
+          <span style="color:${stepColors[s.type]};font-weight:700;font-size:13px">${stepLabels[s.type]}</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700">${fmt(s.duration)}</span>
+        </div>`).join('')}
+      <button class="ai-apply-btn" onclick="applyAIMenu()">▶ このメニューを使う</button>
+    </div>`;
+}
+
+function applyAIMenu() {
+  if (!aiRecommendedSteps) return;
+  sets = aiRecommendedSteps.sets || 4;
+  steps = aiRecommendedSteps.steps.map((s, i) => ({ id: nextId++, type: s.type, duration: s.duration }));
+  document.getElementById('sets-val').textContent = sets;
+  renderSteps();
+  showTab('edit');
+}
+
+// ===== INIT =====
+renderSteps();
+renderShoes();
+updateShoeSelect();
+</script>
+</body>
+</html>
