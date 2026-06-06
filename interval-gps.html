@@ -349,6 +349,22 @@
 </div>
 
 <script>
+// ===== WAKE LOCK =====
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && timerInterval) requestWakeLock();
+});
+
 // ===== STATE =====
 let sets = 4;
 let steps = [
@@ -441,6 +457,10 @@ function adjDur(id, d) {
   renderSteps();
 }
 
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function fmt(sec) {
   const m = Math.floor(sec / 60), s = sec % 60;
   return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
@@ -529,6 +549,7 @@ function startRun() {
   document.getElementById('done-banner').style.display = 'none';
   document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
 
+  requestWakeLock();
   startGPS();
   speak('トレーニングを開始します！');
   loadStep();
@@ -608,6 +629,7 @@ function toggleVoice() {
 function finishRun() {
   clearInterval(timerInterval);
   stopGPS();
+  releaseWakeLock();
   isDone = true;
   speak('お疲れさまでした！トレーニング完了です！');
   document.getElementById('done-banner').style.display = 'block';
@@ -617,13 +639,15 @@ function finishRun() {
   saveRun();
 }
 
-function stopRun() {
+async function stopRun() {
+  if (!confirm('トレーニングを終了して記録を保存しますか？')) return;
   clearInterval(timerInterval);
   stopGPS();
-  if (!isDone) saveRun();
+  if (!isDone) await saveRun();
   document.getElementById('timer-screen').style.display = 'none';
   document.getElementById('edit-screen').style.display = 'block';
   document.querySelectorAll('.tab').forEach(t => t.style.display = '');
+  releaseWakeLock();
 }
 
 // ===== GPS =====
@@ -723,24 +747,41 @@ async function saveRun() {
     shoeId,
     shoeName: shoeId ? (getShoes().find(s => s.id == shoeId)?.name || '') : '',
   };
-  const history = JSON.parse(localStorage.getItem('interval-run-history') || '[]');
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('interval-run-history') || '[]'); } catch(e) {}
   history.unshift(record);
-  localStorage.setItem('interval-run-history', JSON.stringify(history.slice(0, 100)));
+  try { localStorage.setItem('interval-run-history', JSON.stringify(history.slice(0, 100))); } catch(e) {
+    console.warn('localStorage full, trimming history');
+    try { localStorage.setItem('interval-run-history', JSON.stringify(history.slice(0, 20))); } catch(e2) {}
+  }
+}
+
+function deleteHistory(idx) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('interval-run-history') || '[]'); } catch(e) {}
+  history.splice(idx, 1);
+  try { localStorage.setItem('interval-run-history', JSON.stringify(history)); } catch(e) {}
+  renderHistory();
 }
 
 function renderHistory() {
-  const history = JSON.parse(localStorage.getItem('interval-run-history') || '[]');
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('interval-run-history') || '[]'); } catch(e) {}
   const el = document.getElementById('history-list');
   if (history.length === 0) {
     el.innerHTML = '<div class="empty">まだ記録がありません<br>走ってみよう！🏃</div>';
     return;
   }
-  el.innerHTML = history.map(r => {
+  el.innerHTML = history.map((r, idx) => {
     const d = new Date(r.date);
     const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     return `
       <div class="run-entry">
-        <div class="run-date">${dateStr} ${r.gps ? '📍GPS' : '📐推定'}${r.weather ? `　${r.weather.icon} ${r.weather.temp}℃ 風${r.weather.wind}km/h` : ''}${r.shoeName ? `　👟 ${r.shoeName}` : ''}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="run-date">${dateStr} ${r.gps ? '📍GPS' : '📐推定'}${r.weather ? `　${r.weather.icon} ${r.weather.temp}℃ 風${r.weather.wind}km/h` : ''}${r.shoeName ? `　👟 ${esc(r.shoeName)}` : ''}</div>
+          <button onclick="if(confirm('この記録を削除しますか？'))deleteHistory(${idx})"
+            style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;flex-shrink:0;padding:0 0 0 8px">✕</button>
+        </div>
         <div class="run-stats">
           <div class="rs">
             <div class="rs-val">${(r.distM/1000).toFixed(2)}<span style="font-size:12px">km</span></div>
@@ -800,7 +841,7 @@ function renderShoes() {
     return `
       <div class="run-entry">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-weight:700;font-size:15px">👟 ${s.name}</div>
+          <div style="font-weight:700;font-size:15px">👟 ${esc(s.name)}</div>
           <button onclick="deleteShoe(${s.id})"
             style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button>
         </div>
@@ -821,7 +862,7 @@ function updateShoeSelect() {
   const sel = document.getElementById('shoe-select');
   const cur = sel.value;
   sel.innerHTML = '<option value="">選択しない</option>' +
-    shoes.map(s => `<option value="${s.id}" ${cur == s.id ? 'selected' : ''}>${s.name} (${(s.distM/1000).toFixed(0)}km)</option>`).join('');
+    shoes.map(s => `<option value="${s.id}" ${cur == s.id ? 'selected' : ''}>${esc(s.name)} (${(s.distM/1000).toFixed(0)}km)</option>`).join('');
 }
 
 function addDistToShoe(shoeId, distM) {
