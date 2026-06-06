@@ -385,6 +385,7 @@ let watchId = null;
 let lastPos = null;
 let isDone = false;
 let voiceEnabled = true;
+let stepStartDistM = 0;
 
 const COLORS = { run: '#FF2D2D', jog: '#FF8C00', rest: '#00C87A', idle: '#1C1C1E' };
 const LABELS = { run: '🏃 DASH', jog: '🚶 JOG', rest: '⏸ REST' };
@@ -407,11 +408,17 @@ const VOICE_LABELS = { run: 'ダッシュ！', jog: 'ジョグ！', rest: '休�
 function announceStep(step, isLast) {
   if (!step) return;
   const label = VOICE_LABELS[step.type] || '';
-  const sec = step.duration >= 60
-    ? `${Math.floor(step.duration/60)}分`
-    : `${step.duration}秒`;
   const suffix = isLast ? '、ラストセットです！' : '';
-  speak(`${label} ${sec}${suffix}`);
+  let amount;
+  if ((step.mode || 'time') === 'dist') {
+    const m = step.distM || 1000;
+    amount = m >= 1000 ? `${(m/1000).toFixed(1)}キロ` : `${m}メートル`;
+  } else {
+    amount = step.duration >= 60
+      ? `${Math.floor(step.duration/60)}分`
+      : `${step.duration}秒`;
+  }
+  speak(`${label} ${amount}${suffix}`);
 }
 
 function announceCountdown(n) {
@@ -438,7 +445,17 @@ function adjSets(d) {
 }
 
 function addStep() {
-  steps.push({ id: nextId++, type: 'run', duration: 60 });
+  steps.push({ id: nextId++, type: 'run', mode: 'time', duration: 60, distM: 1000 });
+  renderSteps();
+}
+
+function setMode(id, mode) {
+  steps = steps.map(s => s.id === id ? { ...s, mode } : s);
+  renderSteps();
+}
+
+function adjDistM(id, d) {
+  steps = steps.map(s => s.id === id ? { ...s, distM: Math.max(100, s.distM + d) } : s);
   renderSteps();
 }
 
@@ -478,9 +495,45 @@ function fmtPace(distM, elapsedSec) {
   return `${m}'${String(s).padStart(2,'0')}`;
 }
 
+function fmtDistStep(m) {
+  return m >= 1000 ? (m / 1000).toFixed(1) + 'km' : m + 'm';
+}
+
 function renderSteps() {
   const c = document.getElementById('steps-container');
-  c.innerHTML = steps.map((s, i) => `
+  c.innerHTML = steps.map((s, i) => {
+    const mode = s.mode || 'time';
+    const distControl = `
+      <div class="dur-row">
+        <span class="label">距離</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDistM(${s.id},-500)">-500m</button>
+            <button class="adj-btn" onclick="adjDistM(${s.id},-100)">-100m</button>
+          </div>
+          <span class="dur-val">${fmtDistStep(s.distM || 1000)}</span>
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDistM(${s.id},100)">+100m</button>
+            <button class="adj-btn" onclick="adjDistM(${s.id},500)">+500m</button>
+          </div>
+        </div>
+      </div>`;
+    const timeControl = `
+      <div class="dur-row">
+        <span class="label">時間</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDur(${s.id},-30)">-30s</button>
+            <button class="adj-btn" onclick="adjDur(${s.id},-10)">-10s</button>
+          </div>
+          <span class="dur-val">${fmt(s.duration)}</span>
+          <div class="adj-btns">
+            <button class="adj-btn" onclick="adjDur(${s.id},10)">+10s</button>
+            <button class="adj-btn" onclick="adjDur(${s.id},30)">+30s</button>
+          </div>
+        </div>
+      </div>`;
+    return `
     <div class="step-card ${s.type}" data-id="${s.id}"
       draggable="true"
       ondragstart="onDragStart(event,${s.id})"
@@ -501,28 +554,30 @@ function renderSteps() {
             ${ t === 'run' ? '🏃 ダッシュ' : t === 'jog' ? '🚶 ジョグ' : '⏸ 休憩'}
           </button>`).join('')}
       </div>
-      <div class="dur-row">
-        <span class="label">時間</span>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="adj-btns">
-            <button class="adj-btn" onclick="adjDur(${s.id},-30)">-30s</button>
-            <button class="adj-btn" onclick="adjDur(${s.id},-10)">-10s</button>
-          </div>
-          <span class="dur-val">${fmt(s.duration)}</span>
-          <div class="adj-btns">
-            <button class="adj-btn" onclick="adjDur(${s.id},10)">+10s</button>
-            <button class="adj-btn" onclick="adjDur(${s.id},30)">+30s</button>
-          </div>
-        </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="adj-btn" onclick="setMode(${s.id},'time')"
+          style="flex:1;padding:8px;border-radius:10px;${mode==='time'?'background:var(--card2);color:var(--text);':''}">
+          ⏱ 時間
+        </button>
+        <button class="adj-btn" onclick="setMode(${s.id},'dist')"
+          style="flex:1;padding:8px;border-radius:10px;${mode==='dist'?'background:var(--card2);color:var(--text);':''}">
+          📍 距離
+        </button>
       </div>
-    </div>
-  `).join('');
+      ${mode === 'dist' ? distControl : timeControl}
+    </div>`;
+  }).join('');
   updateSummary();
 }
 
 function updateSummary() {
-  const total = steps.reduce((a, s) => a + s.duration, 0) * sets;
-  document.getElementById('total-time-est').textContent = fmt(total);
+  const timeSec = steps.filter(s => (s.mode||'time')==='time').reduce((a, s) => a + s.duration, 0) * sets;
+  const distM   = steps.filter(s => s.mode==='dist').reduce((a, s) => a + (s.distM||1000), 0) * sets;
+  let label = '';
+  if (timeSec > 0 && distM > 0) label = fmt(timeSec) + '＋' + fmtDistStep(distM);
+  else if (distM > 0)            label = fmtDistStep(distM);
+  else                           label = fmt(timeSec);
+  document.getElementById('total-time-est').textContent = label;
   document.getElementById('total-steps-est').textContent = `${steps.length} × ${sets}`;
 }
 
@@ -560,6 +615,7 @@ function loadStep() {
   const cur = queue[stepIdx];
   if (!cur) return;
   timeLeft = cur.duration;
+  stepStartDistM = totalDistM;
   const isLast = cur.setNum === sets && stepIdx === queue.length - 1;
   announceStep(cur, isLast);
   updatePhaseUI();
@@ -568,26 +624,36 @@ function loadStep() {
 
 function tick() {
   elapsedSec++;
-  timeLeft--;
+
+  const cur = queue[stepIdx];
+  const mode = cur?.mode || 'time';
 
   // fallback distance if no GPS
-  if (!gpsActive) {
-    const cur = queue[stepIdx];
-    if (cur) totalDistM += SPEEDS[cur.type];
-  }
+  if (!gpsActive && cur) totalDistM += SPEEDS[cur.type];
 
   updatePhaseUI();
   updateStats();
 
-  // countdown beep at 3,2,1
-  if (timeLeft <= 3 && timeLeft > 0) announceCountdown(timeLeft);
-
-  if (timeLeft <= 0) {
-    stepIdx++;
-    if (stepIdx >= queue.length) {
-      finishRun();
-    } else {
-      loadStep();
+  if (mode === 'dist') {
+    const traveled = totalDistM - stepStartDistM;
+    const target = cur.distM || 1000;
+    const remaining = Math.max(0, target - traveled);
+    // countdown voice near finish
+    if (remaining <= 50 && remaining > 0 && Math.round(remaining) % 10 === 0) {
+      speak(Math.round(remaining) + 'メートル');
+    }
+    if (traveled >= target) {
+      stepIdx++;
+      if (stepIdx >= queue.length) finishRun();
+      else loadStep();
+    }
+  } else {
+    timeLeft--;
+    if (timeLeft <= 3 && timeLeft > 0) announceCountdown(timeLeft);
+    if (timeLeft <= 0) {
+      stepIdx++;
+      if (stepIdx >= queue.length) finishRun();
+      else loadStep();
     }
   }
 }
@@ -598,10 +664,21 @@ function updatePhaseUI() {
   const block = document.getElementById('phase-block');
   block.style.background = COLORS[cur.type];
   document.getElementById('phase-label').textContent = LABELS[cur.type];
-  document.getElementById('phase-time').textContent = fmt(timeLeft);
   document.getElementById('phase-set').textContent = `セット ${cur.setNum} / ${sets}`;
-  const pct = ((cur.duration - timeLeft) / cur.duration * 100).toFixed(1);
-  document.getElementById('progress-bar').style.width = pct + '%';
+
+  const mode = cur.mode || 'time';
+  if (mode === 'dist') {
+    const traveled = totalDistM - stepStartDistM;
+    const target = cur.distM || 1000;
+    const remaining = Math.max(0, target - traveled);
+    document.getElementById('phase-time').textContent = fmtDistStep(Math.round(remaining));
+    const pct = Math.min(100, (traveled / target * 100)).toFixed(1);
+    document.getElementById('progress-bar').style.width = pct + '%';
+  } else {
+    document.getElementById('phase-time').textContent = fmt(timeLeft);
+    const pct = ((cur.duration - timeLeft) / cur.duration * 100).toFixed(1);
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
 }
 
 function updateNextUI() {
