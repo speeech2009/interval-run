@@ -220,6 +220,134 @@
     text-align: center; margin-bottom: 14px;
   }
   .done-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; }
+
+  /* === PROGRAM TAB === */
+  .prog-step-indicator {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .prog-step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--card2); color: var(--muted);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  .prog-step-dot.active { background: var(--run); color: #fff; transform: scale(1.15); }
+  .prog-step-dot.done { background: var(--rest); color: #fff; }
+  .prog-step-line { width: 18px; height: 2px; background: var(--card2); }
+
+  .prog-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 900; letter-spacing: 2px;
+    margin-bottom: 16px; text-transform: uppercase;
+  }
+  .prog-question { font-size: 14px; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
+  .prog-option-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .prog-option {
+    padding: 14px 16px; border-radius: 14px; border: 2px solid var(--card2);
+    background: var(--card); color: var(--text);
+    font-size: 14px; cursor: pointer; text-align: left;
+    transition: all 0.2s;
+  }
+  .prog-option.selected { border-color: var(--run); background: rgba(255,45,45,0.12); }
+
+  .prog-option-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .prog-option-row .prog-option { text-align: center; }
+
+  .prog-btn {
+    width: 100%; padding: 16px; border-radius: 16px; border: none;
+    background: var(--run); color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px; font-weight: 900; letter-spacing: 2px;
+    cursor: pointer; margin-top: 8px;
+  }
+  .prog-btn:disabled { background: var(--card2); color: var(--muted); cursor: not-allowed; }
+  .prog-btn-ghost {
+    width: 100%; padding: 14px; border-radius: 16px;
+    border: 2px solid var(--card2); background: none;
+    color: var(--muted); font-size: 15px; cursor: pointer; margin-top: 8px;
+  }
+
+  .prog-timer-display {
+    text-align: center; padding: 40px 20px;
+    background: var(--card); border-radius: 24px; margin-bottom: 16px;
+  }
+  .prog-timer-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 96px; font-weight: 900; color: var(--run);
+    line-height: 1; letter-spacing: -4px;
+  }
+  .prog-timer-label { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  .prog-loading {
+    text-align: center; padding: 60px 20px;
+  }
+  .prog-spinner {
+    width: 48px; height: 48px; border: 4px solid var(--card2);
+    border-top-color: var(--run); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* program view */
+  .prog-header-card {
+    background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 12px;
+  }
+  .prog-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+  .prog-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .prog-progress-bar-wrap { height: 8px; background: var(--card2); border-radius: 4px; margin-top: 14px; overflow: hidden; }
+  .prog-progress-bar-fill { height: 100%; background: var(--rest); border-radius: 4px; transition: width 0.5s; }
+  .prog-progress-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: right; }
+
+  .prog-week-card {
+    background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 8px;
+  }
+  .prog-week-header {
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  }
+  .prog-week-title { font-weight: 700; font-size: 15px; }
+  .prog-week-status { font-size: 18px; }
+  .prog-week-body { margin-top: 12px; }
+
+  .prog-workout-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--card2); cursor: pointer;
+  }
+  .prog-workout-row:last-child { border-bottom: none; }
+  .prog-workout-label { font-size: 14px; }
+  .prog-workout-check { font-size: 20px; }
+
+  .prog-workout-detail {
+    background: var(--card2); border-radius: 14px; padding: 16px; margin-top: 14px;
+  }
+  .prog-workout-detail-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+  .prog-workout-detail-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .prog-detail-btns { display: flex; gap: 8px; }
+  .prog-detail-btn {
+    flex: 1; padding: 11px; border-radius: 12px; border: none;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .prog-detail-btn.start { background: var(--run); color: #fff; }
+  .prog-detail-btn.done { background: var(--rest); color: #fff; }
+
+  .prog-api-key-input {
+    width: 100%; padding: 14px; border-radius: 12px; border: none;
+    background: var(--card2); color: var(--text); font-size: 14px; margin-bottom: 10px;
+    font-family: monospace;
+  }
+
+  .prog-result-card {
+    background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 12px;
+    text-align: center;
+  }
+  .prog-level-badge {
+    display: inline-block; padding: 6px 16px; border-radius: 20px;
+    background: var(--run); color: #fff;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700;
+    letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .prog-level-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -236,6 +364,9 @@
   </button>
   <button class="tab" onclick="showTab('shoes')">
     <span class="tab-icon">👟</span>シューズ
+  </button>
+  <button class="tab" onclick="showTab('program')">
+    <span class="tab-icon">🎯</span>プログラム
   </button>
 </div>
 
@@ -348,6 +479,11 @@
   <div id="history-list"></div>
 </div>
 
+<!-- PROGRAM SCREEN -->
+<div id="program-screen" style="display:none">
+  <div id="program-content"></div>
+</div>
+
 <script>
 // ===== WAKE LOCK =====
 let wakeLock = null;
@@ -428,13 +564,15 @@ function announceCountdown(n) {
 // ===== TABS =====
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['edit','history','shoes'][i] === tab);
+    t.classList.toggle('active', ['edit','history','shoes','program'][i] === tab);
   });
   document.getElementById('edit-screen').style.display = tab === 'edit' ? 'block' : 'none';
   document.getElementById('history-screen').style.display = tab === 'history' ? 'block' : 'none';
   document.getElementById('shoes-screen').style.display = tab === 'shoes' ? 'block' : 'none';
+  document.getElementById('program-screen').style.display = tab === 'program' ? 'block' : 'none';
   if (tab === 'history') renderHistory();
   if (tab === 'shoes') renderShoes();
+  if (tab === 'program') renderProgramTab();
 }
 
 // ===== EDIT =====
@@ -1024,6 +1162,477 @@ function onTouchEnd() {
 renderSteps();
 renderShoes();
 updateShoeSelect();
+
+// ===== PROGRAM FEATURE =====
+let progWizardStep = 1; // 1〜5
+let progFitness = {
+  frequency: null,  // A/B/C/D
+  pace5k: null,     // A/B/C/D
+  cooperM: null,    // number or null
+  goal: null,       // key string
+  goalTime: null,   // '25:00' etc
+  daysPerWeek: null,// 2/3/4/5
+  weeks: null,      // 4/8/12
+};
+let progCooperTimerInterval = null;
+let progCooperSec = 720; // 12min
+let progCooperRunning = false;
+
+function getProgram() {
+  try { return JSON.parse(localStorage.getItem('interval-program') || 'null'); } catch(e) { return null; }
+}
+function saveProgram(p) {
+  localStorage.setItem('interval-program', JSON.stringify(p));
+}
+function getApiKey() {
+  return localStorage.getItem('interval-api-key') || '';
+}
+function saveApiKey(k) {
+  localStorage.setItem('interval-api-key', k);
+}
+
+function renderProgramTab() {
+  const prog = getProgram();
+  if (prog) {
+    renderProgramView(prog);
+  } else {
+    renderWizard();
+  }
+}
+
+// ===== WIZARD =====
+function renderWizard() {
+  const c = document.getElementById('program-content');
+  const step = progWizardStep;
+
+  const dots = [1,2,3,4,5].map(i => {
+    let cls = '';
+    if (i < step) cls = 'done';
+    else if (i === step) cls = 'active';
+    return `<div class="prog-step-dot ${cls}">${i < step ? '✓' : i}</div>${i < 5 ? '<div class="prog-step-line"></div>' : ''}`;
+  }).join('');
+
+  let body = '';
+
+  if (step === 1) {
+    body = `
+      <div class="prog-section-title">STEP 1 フィットネス診断</div>
+      <div class="prog-question">今のランニング状況は？</div>
+      <div class="prog-option-grid">
+        ${[
+          ['A','ほとんど走っていない'],
+          ['B','月に数回走る'],
+          ['C','週1〜2回走る'],
+          ['D','週3回以上定期的に走る'],
+        ].map(([k,v]) => `<button class="prog-option${progFitness.frequency===k?' selected':''}" onclick="progSelect('frequency','${k}',this)">${k}）${v}</button>`).join('')}
+      </div>
+      <div class="prog-question">5kmを走ったとしたら、どのくらいかかりそう？</div>
+      <div class="prog-option-grid">
+        ${[
+          ['A','40分以上（または走り切れない）'],
+          ['B','30〜40分'],
+          ['C','25〜30分'],
+          ['D','25分以内'],
+        ].map(([k,v]) => `<button class="prog-option${progFitness.pace5k===k?' selected':''}" onclick="progSelect('pace5k','${k}',this)">${k}）${v}</button>`).join('')}
+      </div>
+      <button class="prog-btn" onclick="progNextStep()" ${progFitness.frequency&&progFitness.pace5k?'':'disabled'}>次へ →</button>
+    `;
+  } else if (step === 2) {
+    body = `
+      <div class="prog-section-title">STEP 2 クーパーテスト（任意）</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px">
+        より正確な診断のために、12分間できるだけ遠くを走るテストをします。<br>
+        平らな場所で走れる方はぜひ試してください。
+      </p>
+      <div id="cooper-area">
+        <button class="prog-btn" onclick="startCooperTimer()" id="cooper-start-btn">▶ テストをする</button>
+        <button class="prog-btn-ghost" onclick="progNextStep()">スキップ →</button>
+      </div>
+    `;
+  } else if (step === 3) {
+    body = `
+      <div class="prog-section-title">STEP 3 目標設定</div>
+      <div class="prog-question">目標を選んでください</div>
+      <div class="prog-option-grid">
+        ${[
+          ['finish5k','🏃 5kmを完走したい'],
+          ['faster5k','⚡ 5kmのタイムを縮めたい'],
+          ['finish10k','🏆 10kmを完走したい'],
+          ['fitness','💪 体力をつけたい'],
+        ].map(([k,v]) => `<button class="prog-option${progFitness.goal===k?' selected':''}" onclick="progSelectGoal('${k}',this)">${v}</button>`).join('')}
+      </div>
+      <div id="goal-time-area" style="display:${progFitness.goal==='faster5k'?'block':'none'};margin-bottom:16px">
+        <div class="prog-question">目標タイムを入力（例: 25:00）</div>
+        <input id="goal-time-input" type="text" placeholder="25:00" value="${progFitness.goalTime||''}"
+          style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--card2);color:var(--text);font-size:18px;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:4px"
+          oninput="progFitness.goalTime=this.value">
+      </div>
+      <div class="prog-question">週何回走れますか？</div>
+      <div class="prog-option-row">
+        ${[2,3,4,5].map(n => `<button class="prog-option${progFitness.daysPerWeek===n?' selected':''}" onclick="progSelect('daysPerWeek',${n},this)">${n}回</button>`).join('')}
+      </div>
+      <div class="prog-question">何週間のプログラムにしますか？</div>
+      <div class="prog-option-row">
+        ${[4,8,12].map(n => `<button class="prog-option${progFitness.weeks===n?' selected':''}" onclick="progSelect('weeks',${n},this)">${n}週間</button>`).join('')}
+      </div>
+      <button class="prog-btn" onclick="progNextStep()" ${progFitness.goal&&progFitness.daysPerWeek&&progFitness.weeks?'':'disabled'}>次へ →</button>
+    `;
+  } else if (step === 4) {
+    const hasKey = !!getApiKey();
+    body = `
+      <div class="prog-section-title">STEP 4 Claude API Key</div>
+      ${hasKey
+        ? `<div style="background:rgba(0,200,122,0.1);border-radius:12px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--rest)">✓ APIキーが設定済みです</div>`
+        : `<p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px">
+            プログラム生成にはClaude APIキーが必要です。<br>
+            <a href="https://console.anthropic.com" target="_blank" style="color:var(--run)">console.anthropic.com</a> で取得できます。
+          </p>`
+      }
+      <input class="prog-api-key-input" type="password" id="api-key-input"
+        placeholder="sk-ant-..." value="${getApiKey()}"
+        oninput="saveApiKey(this.value)">
+      <button class="prog-btn" onclick="progNextStep()" ${hasKey||true?'':'disabled'}>生成する →</button>
+    `;
+  } else if (step === 5) {
+    body = `
+      <div class="prog-loading" id="prog-loading">
+        <div class="prog-spinner"></div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">🤖 AIがプログラムを作成中...</div>
+        <div style="font-size:13px;color:var(--muted)">あなたのデータを分析しています</div>
+      </div>
+    `;
+    // Auto-trigger generation
+    setTimeout(() => generateProgram(), 100);
+  }
+
+  c.innerHTML = `
+    <div class="prog-step-indicator">${dots}</div>
+    ${body}
+  `;
+}
+
+function progSelect(key, val, btn) {
+  progFitness[key] = val;
+  // update sibling buttons
+  const siblings = btn.parentElement.querySelectorAll('.prog-option');
+  siblings.forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  renderWizard();
+}
+
+function progSelectGoal(key, btn) {
+  progFitness.goal = key;
+  const siblings = btn.parentElement.querySelectorAll('.prog-option');
+  siblings.forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('goal-time-area').style.display = key === 'faster5k' ? 'block' : 'none';
+  // refresh btn state
+  const nextBtn = btn.closest('#program-content').querySelector('.prog-btn');
+  if (nextBtn) nextBtn.disabled = !(progFitness.goal && progFitness.daysPerWeek && progFitness.weeks);
+}
+
+function progNextStep() {
+  // Validate api key before step 5
+  if (progWizardStep === 4) {
+    const inp = document.getElementById('api-key-input');
+    if (inp && inp.value.trim()) saveApiKey(inp.value.trim());
+    if (!getApiKey()) {
+      alert('APIキーを入力してください');
+      return;
+    }
+  }
+  progWizardStep++;
+  renderWizard();
+}
+
+// ===== COOPER TIMER =====
+function startCooperTimer() {
+  progCooperSec = 720;
+  progCooperRunning = true;
+  const area = document.getElementById('cooper-area');
+  area.innerHTML = `
+    <div class="prog-timer-display">
+      <div class="prog-timer-num" id="cooper-time">12:00</div>
+      <div class="prog-timer-label">12分間走テスト</div>
+    </div>
+    <button class="prog-btn-ghost" id="cooper-stop-btn" onclick="stopCooperTimer()">■ 終了</button>
+  `;
+  progCooperTimerInterval = setInterval(() => {
+    progCooperSec--;
+    const m = Math.floor(progCooperSec / 60), s = progCooperSec % 60;
+    const el = document.getElementById('cooper-time');
+    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (progCooperSec <= 0) {
+      clearInterval(progCooperTimerInterval);
+      speak('テスト終了です！');
+      showCooperResult();
+    }
+  }, 1000);
+  speak('12分間走テスト開始！');
+  requestWakeLock();
+}
+
+function stopCooperTimer() {
+  clearInterval(progCooperTimerInterval);
+  showCooperResult();
+}
+
+function showCooperResult() {
+  releaseWakeLock();
+  const area = document.getElementById('cooper-area');
+  area.innerHTML = `
+    <div class="prog-question">何メートル走れましたか？</div>
+    <input type="number" id="cooper-dist-input" placeholder="例: 1800"
+      style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--card2);color:var(--text);font-size:22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:10px;text-align:center"
+      oninput="progFitness.cooperM=parseInt(this.value)||null">
+    <div id="cooper-judge" style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px"></div>
+    <button class="prog-btn" onclick="progNextStep()">次へ →</button>
+  `;
+  // live judgment
+  const inp = area.querySelector('input');
+  inp.addEventListener('input', () => {
+    const m = parseInt(inp.value) || 0;
+    const el = document.getElementById('cooper-judge');
+    if (m >= 2400) el.textContent = '🏅 エリート級！';
+    else if (m >= 2100) el.textContent = '⭐ 優秀';
+    else if (m >= 1600) el.textContent = '👍 平均的';
+    else el.textContent = '🌱 これから伸びていきましょう';
+    el.style.color = m >= 2100 ? 'var(--rest)' : m >= 1600 ? 'var(--jog)' : 'var(--muted)';
+  });
+}
+
+// ===== GENERATE PROGRAM =====
+async function generateProgram() {
+  const f = progFitness;
+  const freqMap = { A: 'ほとんど走っていない', B: '月に数回走る', C: '週1〜2回走る', D: '週3回以上定期的に走る' };
+  const paceMap = { A: '40分以上（または走り切れない）', B: '30〜40分', C: '25〜30分', D: '25分以内' };
+  const goalMap = { finish5k: '5kmを完走したい', faster5k: `5kmを${f.goalTime||''}で走りたい`, finish10k: '10kmを完走したい', fitness: '体力をつけたい' };
+
+  let cooperLine = '';
+  if (f.cooperM) cooperLine = `クーパーテスト：${f.cooperM}m`;
+
+  const prompt = `あなたはランニングコーチです。以下のデータを元に、パーソナライズされたランニングプログラムを作成してください。
+
+【診断結果】
+ランニング頻度：${freqMap[f.frequency] || '不明'}
+5km推定タイム：${paceMap[f.pace5k] || '不明'}
+${cooperLine}
+目標：${goalMap[f.goal] || '不明'}
+週の練習回数：${f.daysPerWeek}回
+期間：${f.weeks}週間
+
+以下のJSON形式で返してください。他のテキストは不要です：
+{
+  "level": "初級",
+  "levelDesc": "レベルの説明（2〜3文）",
+  "weeks": [
+    {
+      "week": 1,
+      "theme": "週のテーマ",
+      "workouts": [
+        {
+          "id": "w1d1",
+          "dayLabel": "1回目",
+          "title": "ワークアウトタイトル",
+          "description": "内容の説明（2〜3文）",
+          "steps": [
+            {"type": "jog", "mode": "time", "duration": 1800, "distM": 0}
+          ],
+          "sets": 1
+        }
+      ]
+    }
+  ]
+}
+
+typeはrun/jog/restのいずれか。modeはtime（durationは秒）またはdist（distMはメートル）。全${f.weeks}週分を作成すること。`;
+
+  try {
+    const apiKey = getApiKey();
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content[0].text.trim();
+    // extract JSON
+    const jsonStr = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+    const prog = JSON.parse(jsonStr);
+    prog.goal = f.goal;
+    prog.weeks_total = f.weeks;
+    prog.created = new Date().toISOString();
+    saveProgram(prog);
+    saveApiKey(apiKey);
+
+    // Show result
+    const c = document.getElementById('program-content');
+    c.innerHTML = `
+      <div class="prog-result-card">
+        <div class="prog-level-badge">${prog.level}</div>
+        <div class="prog-level-desc">${prog.levelDesc}</div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">プログラムが作成されました！</div>
+      <button class="prog-btn" onclick="renderProgramView(getProgram())">プログラムを見る →</button>
+    `;
+  } catch(e) {
+    document.getElementById('program-content').innerHTML = `
+      <div style="background:rgba(255,45,45,0.1);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700;color:var(--run);margin-bottom:8px">エラーが発生しました</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(e.message)}</div>
+      </div>
+      <button class="prog-btn" onclick="progWizardStep=4;renderWizard()">← APIキーを確認</button>
+    `;
+  }
+}
+
+// ===== PROGRAM VIEW =====
+let expandedWeek = null;
+let expandedWorkout = null;
+
+function renderProgramView(prog) {
+  if (!prog) return;
+  const c = document.getElementById('program-content');
+
+  // calc progress
+  let totalWorkouts = 0, doneWorkouts = 0;
+  prog.weeks.forEach(w => {
+    w.workouts.forEach(wo => {
+      totalWorkouts++;
+      if (wo.done) doneWorkouts++;
+    });
+  });
+  const pct = totalWorkouts > 0 ? Math.round(doneWorkouts / totalWorkouts * 100) : 0;
+  const bar = '█'.repeat(Math.round(pct / 10)) + '░'.repeat(10 - Math.round(pct / 10));
+
+  // find current week (first incomplete)
+  let currentWeekIdx = prog.weeks.findIndex(w => w.workouts.some(wo => !wo.done));
+  if (currentWeekIdx < 0) currentWeekIdx = prog.weeks.length - 1;
+  if (expandedWeek === null) expandedWeek = currentWeekIdx;
+
+  const goalLabels = { finish5k: '5km完走', faster5k: '5kmタイム更新', finish10k: '10km完走', fitness: '体力アップ' };
+
+  const weeksHtml = prog.weeks.map((w, wi) => {
+    const allDone = w.workouts.every(wo => wo.done);
+    const isCurrent = wi === currentWeekIdx;
+    const isExpanded = wi === expandedWeek;
+    const isLocked = wi > currentWeekIdx && !allDone;
+
+    let statusIcon = allDone ? '✅' : isCurrent ? '🏃' : isLocked ? '🔒' : '⬜';
+
+    let bodyHtml = '';
+    if (isExpanded && !isLocked) {
+      const workoutsHtml = w.workouts.map((wo, doi) => {
+        const isExpandedWo = expandedWorkout === `${wi}-${doi}`;
+        const check = wo.done ? '✅' : '⬜';
+        let detailHtml = '';
+        if (isExpandedWo) {
+          const stepsText = wo.steps.map(s => {
+            const t = s.type === 'run' ? '🏃ダッシュ' : s.type === 'jog' ? '🚶ジョグ' : '⏸休憩';
+            const amt = s.mode === 'dist' ? `${s.distM}m` : fmt(s.duration);
+            return `${t} ${amt}`;
+          }).join('、');
+          detailHtml = `
+            <div class="prog-workout-detail">
+              <div class="prog-workout-detail-title">${esc(wo.title)}</div>
+              <div class="prog-workout-detail-desc">${esc(wo.description)}<br><span style="font-size:11px;color:var(--muted)">${stepsText}</span></div>
+              <div class="prog-detail-btns">
+                <button class="prog-detail-btn start" onclick="launchWorkout(${wi},${doi})">▶ タイマーで開始</button>
+                <button class="prog-detail-btn done" onclick="markWorkoutDone(${wi},${doi})">${wo.done ? '✓ 完了済み' : '✅ 完了にする'}</button>
+              </div>
+            </div>`;
+        }
+        return `
+          <div class="prog-workout-row" onclick="toggleWorkout(${wi},${doi})">
+            <span class="prog-workout-label">${esc(wo.dayLabel)}：${esc(wo.title)}</span>
+            <span class="prog-workout-check">${check}</span>
+          </div>
+          ${detailHtml}`;
+      }).join('');
+      bodyHtml = `<div class="prog-week-body">${workoutsHtml}</div>`;
+    }
+
+    return `
+      <div class="prog-week-card">
+        <div class="prog-week-header" onclick="toggleWeek(${wi})">
+          <span class="prog-week-title">Week ${w.week}　<span style="font-size:12px;color:var(--muted);font-weight:400">${esc(w.theme)}</span></span>
+          <span class="prog-week-status">${statusIcon}</span>
+        </div>
+        ${bodyHtml}
+      </div>`;
+  }).join('');
+
+  c.innerHTML = `
+    <div class="prog-header-card">
+      <div class="prog-title">📋 ${prog.weeks_total}週間プログラム</div>
+      <div class="prog-meta">${goalLabels[prog.goal] || ''}　レベル：${prog.level}</div>
+      <div class="prog-progress-bar-wrap">
+        <div class="prog-progress-bar-fill" style="width:${pct}%"></div>
+      </div>
+      <div class="prog-progress-label">${bar} ${pct}%　${doneWorkouts}/${totalWorkouts}回完了</div>
+    </div>
+    ${weeksHtml}
+    <button class="prog-btn-ghost" style="margin-top:16px" onclick="if(confirm('プログラムをリセットして最初からやり直しますか？')){localStorage.removeItem('interval-program');progWizardStep=1;progFitness={frequency:null,pace5k:null,cooperM:null,goal:null,goalTime:null,daysPerWeek:null,weeks:null};expandedWeek=null;expandedWorkout=null;renderProgramTab()}">
+      🔄 プログラムをリセット
+    </button>
+  `;
+}
+
+function toggleWeek(wi) {
+  expandedWeek = expandedWeek === wi ? null : wi;
+  expandedWorkout = null;
+  renderProgramView(getProgram());
+}
+
+function toggleWorkout(wi, doi) {
+  const key = `${wi}-${doi}`;
+  expandedWorkout = expandedWorkout === key ? null : key;
+  renderProgramView(getProgram());
+}
+
+function markWorkoutDone(wi, doi) {
+  const prog = getProgram();
+  if (!prog) return;
+  const wo = prog.weeks[wi].workouts[doi];
+  wo.done = !wo.done;
+  wo.doneAt = wo.done ? new Date().toISOString() : null;
+  saveProgram(prog);
+  expandedWorkout = null;
+  renderProgramView(prog);
+}
+
+function launchWorkout(wi, doi) {
+  const prog = getProgram();
+  if (!prog) return;
+  const wo = prog.weeks[wi].workouts[doi];
+
+  // Override global steps/sets and switch to edit tab
+  steps = wo.steps.map((s, i) => ({ id: i + 1, type: s.type, mode: s.mode || 'time', duration: s.duration || 60, distM: s.distM || 1000 }));
+  nextId = steps.length + 1;
+  sets = wo.sets || 1;
+  document.getElementById('sets-val').textContent = sets;
+  renderSteps();
+
+  // Switch to menu tab and start
+  showTab('edit');
+  setTimeout(() => startRun(), 100);
+}
+
 </script>
 </body>
 </html>
