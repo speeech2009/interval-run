@@ -455,7 +455,7 @@ function setMode(id, mode) {
 }
 
 function adjDistM(id, d) {
-  steps = steps.map(s => s.id === id ? { ...s, distM: Math.max(100, s.distM + d) } : s);
+  steps = steps.map(s => s.id === id ? { ...s, distM: Math.max(100, (s.distM || 1000) + d) } : s);
   renderSteps();
 }
 
